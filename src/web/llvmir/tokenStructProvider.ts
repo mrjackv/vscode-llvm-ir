@@ -28,25 +28,29 @@ export class TokenStructProvider {
             let labelMatch = line.match(Regexp.label);
             let assignmentMatch = line.match(Regexp.assignment);
             let isAssignment = false;
-            if (labelMatch !== null && labelMatch.index !== undefined) {
-                let pos = new Position(i, labelMatch.index);
-                assMap.set("%" + labelMatch[1], pos);
-            } else if (assignmentMatch !== null && assignmentMatch.index !== undefined) {
+            let isLabel = false;
+            if (assignmentMatch !== null && assignmentMatch.index !== undefined) {
                 let pos = new Position(i, assignmentMatch.index);
                 assMap.set(assignmentMatch[1], pos);
                 isAssignment = true;
+            } else if (labelMatch !== null && labelMatch.index !== undefined) {
+                let pos = new Position(i, labelMatch.index);
+                assMap.set("%" + labelMatch[1], pos);
+                isLabel = true;
             }
 
-            let regexpIterator = line.matchAll(Regexp.identifier);
-            if (isAssignment) {
-                regexpIterator.next();
-            }
-            while (true) {
-                let newMatch = regexpIterator.next();
-                if (newMatch.value !== undefined) {
-                    this.addXref(xrefMap, newMatch.value[0], i, newMatch);
-                } else {
-                    break;
+            if (!isLabel) {
+                let regexpIterator = line.matchAll(Regexp.identifier);
+                if (isAssignment) {
+                    regexpIterator.next();
+                }
+                while (true) {
+                    let newMatch = regexpIterator.next();
+                    if (newMatch.value !== undefined) {
+                        this.addXref(xrefMap, newMatch.value[0], i, newMatch);
+                    } else {
+                        break;
+                    }
                 }
             }
         }
