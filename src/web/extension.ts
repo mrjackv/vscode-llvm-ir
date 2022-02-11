@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { LLVMIRDefinitionProvider } from "./llvmir/llvmirDefinitionProvider";
+import { LLVMIRFoldingProvider } from "./llvmir/llvmirFoldingProvider";
 import { LLVMReferenceProvider } from "./llvmir/llvmReferenceProvider";
 import { TokenStructProvider } from "./llvmir/tokenStructProvider";
 import { ModelDocumentFoldingProvider } from "./model/modelDocumentFoldingProvider";
@@ -16,7 +17,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.languages.registerDocumentLinkProvider(modelDocumentFilter, new ModelDocumentLinkProvider()),
         vscode.languages.registerFoldingRangeProvider(modelDocumentFilter, new ModelDocumentFoldingProvider()),
         vscode.languages.registerDefinitionProvider(llvmirDocumentFilter, new LLVMIRDefinitionProvider(tsp)),
-        vscode.languages.registerReferenceProvider(llvmirDocumentFilter, new LLVMReferenceProvider(tsp))
+        vscode.languages.registerReferenceProvider(llvmirDocumentFilter, new LLVMReferenceProvider(tsp)),
+        vscode.languages.registerFoldingRangeProvider(llvmirDocumentFilter, new LLVMIRFoldingProvider(tsp))
     );
 }
 

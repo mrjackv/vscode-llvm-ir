@@ -1,4 +1,4 @@
-import { Position, Range, TextDocument, Uri } from "vscode";
+import { FoldingRange, FoldingRangeKind, Position, Range, TextDocument, Uri } from "vscode";
 import { Regexp } from "./Regexp";
 import { TokenStruct } from "./tokenStruct";
 
@@ -23,8 +23,10 @@ export class TokenStructProvider {
     scanDocument(document: TextDocument): TokenStruct {
         const assMap = new Map<string, Position>();
         const xrefMap = new Map<string, Range[]>();
+        const foldingRanges = [];
+        let lastLabelLine: number | undefined = undefined;
         for (let i = 0; i < document.lineCount; i++) {
-            let line = document.lineAt(i).text;
+            let line = document.lineAt(i).text.split(";", 2)[0];
             let labelMatch = line.match(Regexp.label);
             let assignmentMatch = line.match(Regexp.assignment);
             let isAssignment = false;
@@ -37,6 +39,10 @@ export class TokenStructProvider {
                 let pos = new Position(i, labelMatch.index);
                 assMap.set("%" + labelMatch[1], pos);
                 isLabel = true;
+                if (lastLabelLine !== undefined) {
+                    foldingRanges.push(new FoldingRange(lastLabelLine, i - 1, FoldingRangeKind.Region));
+                }
+                lastLabelLine = i;
             }
 
             if (!isLabel) {
@@ -54,7 +60,7 @@ export class TokenStructProvider {
                 }
             }
         }
-        return { version: document.version, assignments: assMap, xrefs: xrefMap };
+        return { version: document.version, assignments: assMap, xrefs: xrefMap, foldingRanges: foldingRanges };
     }
 
     private addXref(xrefMap: Map<string, Range[]>, key: string, lineNum: number, match: any) {
