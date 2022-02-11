@@ -7,17 +7,15 @@ import {
     Position,
     ProviderResult,
     TextDocument,
-    Uri,
 } from "vscode";
-import { LLScanner } from "./llScanner";
+import { TokenStructProvider } from "./tokenStructProvider";
 import { Regexp } from "./Regexp";
-import { TokenStruct } from "./tokenStruct";
 
 export class LLVMIRDefinitionProvider implements DefinitionProvider {
-    private tokenMap: Map<Uri, TokenStruct>;
+    private tokenStructProvider: TokenStructProvider;
 
-    constructor() {
-        this.tokenMap = new Map<Uri, TokenStruct>();
+    constructor(tokenStructProvider: TokenStructProvider) {
+        this.tokenStructProvider = tokenStructProvider;
     }
 
     provideDefinition(
@@ -25,16 +23,12 @@ export class LLVMIRDefinitionProvider implements DefinitionProvider {
         position: Position,
         token: CancellationToken
     ): ProviderResult<Definition | LocationLink[]> {
-        const documentMap = this.tokenMap.get(document.uri);
+        const documentMap = this.tokenStructProvider.getStruct(document);
         const varRange = document.getWordRangeAtPosition(position, Regexp.identifier);
         const varName = document.getText(varRange);
         let varPosition: Position | undefined;
-        if (documentMap !== undefined && document.version === documentMap.version && varName !== undefined) {
+        if (varName !== undefined) {
             varPosition = documentMap.assignments.get(varName);
-        } else {
-            const newDocumentMap = LLScanner.scanDocument(document);
-            this.tokenMap.set(document.uri, newDocumentMap);
-            varPosition = newDocumentMap.assignments.get(varName);
         }
         return varPosition !== undefined ? new Location(document.uri, varPosition) : [];
     }
