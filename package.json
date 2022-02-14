@@ -1,7 +1,7 @@
 {
-	"name": "revng-toolbox",
-	"displayName": "revng-toolbox",
-	"description": "Revng Toolbox Functionality",
+	"name": "revng-vscode-llvm-ir",
+	"displayName": "revng-vscode-llvm-ir",
+	"description": "Revng VSCode extension for LLVM IR",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.64.0"

@@ -1,3 +1,3 @@
-# revng-toolbox README
+# vscode-llvm-ir README
 
-revng-toolbox
+vscode-llvm-ir
