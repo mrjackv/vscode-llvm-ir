@@ -8,13 +8,13 @@ import {
     ProviderResult,
     TextDocument,
 } from "vscode";
-import { TokenStructProvider } from "./tokenStructProvider";
+import { LspStructProvider } from "./lspStructProvider";
 import { Regexp } from "./Regexp";
 
 export class LLVMIRDefinitionProvider implements DefinitionProvider {
-    private tokenStructProvider: TokenStructProvider;
+    private tokenStructProvider: LspStructProvider;
 
-    constructor(tokenStructProvider: TokenStructProvider) {
+    constructor(tokenStructProvider: LspStructProvider) {
         this.tokenStructProvider = tokenStructProvider;
     }
 

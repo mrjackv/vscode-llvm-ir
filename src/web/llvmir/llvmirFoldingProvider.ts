@@ -7,12 +7,12 @@ import {
     ProviderResult,
     TextDocument,
 } from "vscode";
-import { TokenStructProvider } from "./tokenStructProvider";
+import { LspStructProvider } from "./lspStructProvider";
 
 export class LLVMIRFoldingProvider implements FoldingRangeProvider {
-    private tokenStructProvider: TokenStructProvider;
+    private tokenStructProvider: LspStructProvider;
 
-    constructor(tokenStructProvider: TokenStructProvider) {
+    constructor(tokenStructProvider: LspStructProvider) {
         this.tokenStructProvider = tokenStructProvider;
     }
 

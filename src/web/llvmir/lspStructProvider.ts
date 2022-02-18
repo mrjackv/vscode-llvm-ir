@@ -1,15 +1,15 @@
 import { FoldingRange, FoldingRangeKind, Position, Range, TextDocument, Uri } from "vscode";
 import { Regexp } from "./Regexp";
-import { TokenStruct } from "./tokenStruct";
+import { LspStruct } from "./lspStruct";
 
-export class TokenStructProvider {
-    private tokenMap: Map<Uri, TokenStruct>;
+export class LspStructProvider {
+    private tokenMap: Map<Uri, LspStruct>;
 
     constructor() {
-        this.tokenMap = new Map<Uri, TokenStruct>();
+        this.tokenMap = new Map<Uri, LspStruct>();
     }
 
-    getStruct(document: TextDocument): TokenStruct {
+    getStruct(document: TextDocument): LspStruct {
         const documentMap = this.tokenMap.get(document.uri);
         if (documentMap !== undefined && document.version === documentMap.version) {
             return documentMap;
@@ -20,7 +20,7 @@ export class TokenStructProvider {
         }
     }
 
-    scanDocument(document: TextDocument): TokenStruct {
+    scanDocument(document: TextDocument): LspStruct {
         const assMap = new Map<string, Position>();
         const xrefMap = new Map<string, Range[]>();
         const foldingRanges = [];
