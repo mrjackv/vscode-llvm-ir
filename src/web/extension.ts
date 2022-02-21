@@ -5,8 +5,6 @@ import { LLVMReferenceProvider } from "./llvmir/llvmReferenceProvider";
 import { LspStructProvider } from "./llvmir/lspStructProvider";
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Congratulations, your extension "revng-vscode-llvm-ir" is now active in the web extension host!');
-
     const llvmirDocumentFilter: vscode.DocumentFilter = { pattern: "**/*.ll" };
     const lsp = new LspStructProvider();
 
