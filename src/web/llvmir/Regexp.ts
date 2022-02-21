@@ -17,7 +17,7 @@ export namespace Regexp {
     const attributeGroupFrag = `#\\d+`;
 
     // Matches metadata
-    const metadataFrag = `!\\d+`;
+    const metadataFrag = `!(${identifierFrag}|\\d+)`;
 
     // We vacuum up all identifiers by "OR-ing" all of them
     const allIdentifiersFrag = `(${globalVarFrag}|${allLocalVarFrag}|${attributeGroupFrag}|${metadataFrag})`;
@@ -40,7 +40,7 @@ export namespace Regexp {
     export const argument = new RegExp(`(?<ass>${localVarFrag})\\s*,`, "g");
 
     // Labels are matched inside the 'label' capture to ease processing
-    export const label = new RegExp(`(?<label>(${identifierFrag}|\\d+)):`);
+    export const label = new RegExp(`^(?<label>(${identifierFrag}|\\d+)):`);
 
     // We capture function name to 'funcid'
     // and the arguments to 'args'
