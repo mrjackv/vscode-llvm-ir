@@ -47,6 +47,9 @@ export namespace Regexp {
     // 'open' if present means that the function has a body
     export const define = new RegExp(`^define.*(?<funcid>${globalVarFrag})\\((?<args>.*)\\).*(|(?<open>\\{))\\s*$`);
 
+    // Capture declare, without args
+    export const declare = new RegExp(`^declare.*(?<funcid>${globalVarFrag})\\(.*\\).*$`);
+
     // The closing bracket of a function
     export const close = new RegExp("^\\s*}\\s*$");
 }

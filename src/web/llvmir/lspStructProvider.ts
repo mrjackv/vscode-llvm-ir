@@ -28,8 +28,9 @@ export class LspStructProvider {
             let line = document.lineAt(i).text.split(";", 2)[0];
             let labelMatch = line.match(Regexp.label);
             let defineMatch = line.match(Regexp.define);
+            let declareMatch = line.match(Regexp.declare);
             let closeMatch = line.match(Regexp.close);
-            let skip = false;
+            let skip = true;
             if (defineMatch !== null && defineMatch.index !== null && defineMatch.groups !== undefined) {
                 let funcid = defineMatch.groups["funcid"];
                 let args = defineMatch.groups["args"];
@@ -46,7 +47,6 @@ export class LspStructProvider {
                         }
                     });
                 }
-                skip = true;
             } else if (labelMatch !== null && labelMatch.index !== undefined && labelMatch.groups !== undefined) {
                 let pos = new Position(i, labelMatch.index);
                 if (lastFunction !== undefined) {
@@ -55,7 +55,6 @@ export class LspStructProvider {
                 if (lastLabelLine !== undefined) {
                     res.foldingRanges.push(new FoldingRange(lastLabelLine, i - 1, FoldingRangeKind.Region));
                 }
-                skip = true;
                 lastLabelLine = i;
             } else if (closeMatch !== null) {
                 if (lastFunction !== undefined) {
@@ -64,7 +63,12 @@ export class LspStructProvider {
                     res.functions.set(lastFunction.name, lastFunction.vs);
                     lastFunction = undefined;
                 }
-                skip = true;
+            } else if (declareMatch !== null && declareMatch.groups !== undefined) {
+                let funcid = declareMatch.groups["funcid"];
+                let offset = line.indexOf(funcid);
+                res.global.assignments.set(funcid, new Position(i, offset));
+            } else {
+                skip = false;
             }
 
             if (!skip) {
