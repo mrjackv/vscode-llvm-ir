@@ -1,3 +1,7 @@
+//
+// This file is distributed under the MIT License. See LICENSE.md for details.
+//
+
 import { FoldingRange, FoldingRangeKind, Position, Range, TextDocument, Uri } from "vscode";
 import { Regexp } from "./Regexp";
 import { LspStruct, VariablesStruct } from "./lspStruct";

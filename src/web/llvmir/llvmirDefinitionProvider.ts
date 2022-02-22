@@ -1,3 +1,7 @@
+//
+// This file is distributed under the MIT License. See LICENSE.md for details.
+//
+
 import { CancellationToken, DefinitionProvider, Location, Position, TextDocument, Uri } from "vscode";
 import { getFunctionFromLine } from "./lspStruct";
 import { LspStructProvider } from "./lspStructProvider";

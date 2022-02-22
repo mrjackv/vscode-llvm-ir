@@ -1,3 +1,7 @@
+//
+// This file is distributed under the MIT License. See LICENSE.md for details.
+//
+
 import * as vscode from "vscode";
 import { LLVMIRDefinitionProvider } from "./llvmir/llvmirDefinitionProvider";
 import { LLVMIRFoldingProvider } from "./llvmir/llvmirFoldingProvider";

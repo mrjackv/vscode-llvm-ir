@@ -1,3 +1,7 @@
+//
+// This file is distributed under the MIT License. See LICENSE.md for details.
+//
+
 // imports mocha for the browser, defining the `mocha` global.
 require("mocha/mocha");
 

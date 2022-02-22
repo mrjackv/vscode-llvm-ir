@@ -1,3 +1,7 @@
+//
+// This file is distributed under the MIT License. See LICENSE.md for details.
+//
+
 import * as assert from "assert";
 
 // You can import and use all API from the 'vscode' module
