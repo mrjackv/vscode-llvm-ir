@@ -1,4 +1,7 @@
 {
+	"extends": [
+		"./node_modules/gts"
+	],
     "root": true,
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
