@@ -25,30 +25,30 @@ export class LspStructProvider {
         let lastFunction: LastFunction | undefined;
         let lastLabelLine: number | undefined = undefined;
         for (let i = 0; i < document.lineCount; i++) {
-            let line = document.lineAt(i).text.split(";", 2)[0];
-            let labelMatch = line.match(Regexp.label);
-            let defineMatch = line.match(Regexp.define);
-            let declareMatch = line.match(Regexp.declare);
-            let closeMatch = line.match(Regexp.close);
+            const line = document.lineAt(i).text.split(";", 2)[0];
+            const labelMatch = line.match(Regexp.label);
+            const defineMatch = line.match(Regexp.define);
+            const declareMatch = line.match(Regexp.declare);
+            const closeMatch = line.match(Regexp.close);
             let skip = true;
             if (defineMatch !== null && defineMatch.index !== null && defineMatch.groups !== undefined) {
-                let funcid = defineMatch.groups["funcid"];
-                let args = defineMatch.groups["args"];
-                let hasBody = line.endsWith("{");
+                const funcid = defineMatch.groups["funcid"];
+                const args = defineMatch.groups["args"];
+                const hasBody = line.endsWith("{");
                 if (hasBody) {
-                    let vs = new VariablesStruct();
+                    const vs = new VariablesStruct();
                     lastFunction = { name: funcid, line: i, vs: vs };
                     res.functions.set(funcid, vs);
-                    let argsMatch = Array.from(args.matchAll(Regexp.argument));
+                    const argsMatch = Array.from(args.matchAll(Regexp.argument));
                     argsMatch.forEach((am) => {
                         if (am.index !== undefined && am.groups !== undefined) {
-                            let pos = new Position(i, am.index);
+                            const pos = new Position(i, am.index);
                             vs.assignments.set(am.groups["ass"], pos);
                         }
                     });
                 }
             } else if (labelMatch !== null && labelMatch.index !== undefined && labelMatch.groups !== undefined) {
-                let pos = new Position(i, labelMatch.index);
+                const pos = new Position(i, labelMatch.index);
                 if (lastFunction !== undefined) {
                     lastFunction.vs.assignments.set("%" + labelMatch.groups["label"], pos);
                 }
@@ -64,21 +64,21 @@ export class LspStructProvider {
                     lastFunction = undefined;
                 }
             } else if (declareMatch !== null && declareMatch.groups !== undefined) {
-                let funcid = declareMatch.groups["funcid"];
-                let offset = line.indexOf(funcid);
+                const funcid = declareMatch.groups["funcid"];
+                const offset = line.indexOf(funcid);
                 res.global.assignments.set(funcid, new Position(i, offset));
             } else {
                 skip = false;
             }
 
             if (!skip) {
-                let identifierMatches = Array.from(line.matchAll(Regexp.refOrAss));
+                const identifierMatches = Array.from(line.matchAll(Regexp.refOrAss));
 
                 identifierMatches.forEach((am) => {
                     if (am.index !== undefined && am.groups !== undefined) {
-                        let pos = new Position(i, am.index);
+                        const pos = new Position(i, am.index);
                         if (am.groups["ass"] !== undefined) {
-                            let varname = am.groups["ass"];
+                            const varname = am.groups["ass"];
                             if (varname.startsWith("%")) {
                                 if (lastFunction !== undefined) {
                                     lastFunction.vs.assignments.set(varname, pos);
@@ -87,7 +87,7 @@ export class LspStructProvider {
                                 res.global.assignments.set(varname, pos);
                             }
                         } else if (am.groups["ref"] !== undefined) {
-                            let varname = am.groups["ref"];
+                            const varname = am.groups["ref"];
                             if (varname.startsWith("%")) {
                                 if (lastFunction !== undefined) {
                                     this.addXref(lastFunction.vs.xrefs, varname, i, am.index, am.groups["ref"]);
@@ -104,8 +104,8 @@ export class LspStructProvider {
     }
 
     private addXref(xrefMap: Map<string, Range[]>, key: string, lineNum: number, index: number, val: string) {
-        let value = xrefMap.get(key);
-        let newRange = new Range(new Position(lineNum, index), new Position(lineNum, index + val.length));
+        const value = xrefMap.get(key);
+        const newRange = new Range(new Position(lineNum, index), new Position(lineNum, index + val.length));
         if (value !== undefined) {
             value.push(newRange);
             xrefMap.set(key, value);

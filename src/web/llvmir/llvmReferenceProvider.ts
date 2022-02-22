@@ -31,7 +31,7 @@ export class LLVMReferenceProvider implements ReferenceProvider {
         const labelRange = document.getWordRangeAtPosition(position, Regexp.label);
         const functionMarker = getFunctionFromLine(lspStruct.functionMarkers, position.line);
         if (varRange !== undefined) {
-            let varName = document.getText(varRange);
+            const varName = document.getText(varRange);
             if (varName.startsWith("%") && functionMarker !== undefined) {
                 const functionMap = lspStruct.functions.get(functionMarker.name);
                 return this.transform(document.uri, functionMap?.xrefs?.get(varName));

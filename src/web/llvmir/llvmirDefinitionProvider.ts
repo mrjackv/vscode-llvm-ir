@@ -40,7 +40,7 @@ export class LLVMIRDefinitionProvider implements DefinitionProvider {
         if (localPosition !== undefined) {
             return new Location(uri, localPosition);
         }
-        let globalPosition = globals.get(varName);
+        const globalPosition = globals.get(varName);
         return globalPosition !== undefined ? new Location(uri, globalPosition) : undefined;
     }
 }

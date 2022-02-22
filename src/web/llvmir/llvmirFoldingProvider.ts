@@ -1,6 +1,5 @@
 import {
     CancellationToken,
-    Event,
     FoldingContext,
     FoldingRange,
     FoldingRangeProvider,

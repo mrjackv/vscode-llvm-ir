@@ -14,7 +14,7 @@ export namespace Regexp {
     const allLocalVarFrag = `%(${identifierFrag}|\\d+)`;
 
     // Matches attributes
-    const attributeGroupFrag = `#\\d+`;
+    const attributeGroupFrag = "#\\d+";
 
     // Matches metadata
     const metadataFrag = `!(${identifierFrag}|\\d+)`;
