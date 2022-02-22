@@ -3,16 +3,16 @@
 //
 
 import * as vscode from "vscode";
-import { LLVMIRDefinitionProvider } from "./llvmir/llvmirDefinitionProvider";
-import { LLVMIRFoldingProvider } from "./llvmir/llvmirFoldingProvider";
-import { LLVMReferenceProvider } from "./llvmir/llvmReferenceProvider";
-import { LspStructProvider } from "./llvmir/lspStructProvider";
+import { LLVMIRDefinitionProvider } from "./llvmir/definition_provider";
+import { LLVMIRFoldingProvider } from "./llvmir/folding_provider";
+import { LLVMReferenceProvider } from "./llvmir/reference_provider";
+import { LspModelProvider } from "./llvmir/lsp_model_provider";
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "revng-vscode-llvm-ir" is now active in the web extension host!');
 
     const llvmirDocumentFilter: vscode.DocumentFilter = { pattern: "**/*.ll" };
-    const lsp = new LspStructProvider();
+    const lsp = new LspModelProvider();
 
     context.subscriptions.push(
         vscode.languages.registerDefinitionProvider(llvmirDocumentFilter, new LLVMIRDefinitionProvider(lsp)),

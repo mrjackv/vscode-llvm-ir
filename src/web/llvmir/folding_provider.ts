@@ -10,13 +10,13 @@ import {
     ProviderResult,
     TextDocument,
 } from "vscode";
-import { LspStructProvider } from "./lspStructProvider";
+import { LspModelProvider } from "./lsp_model_provider";
 
 export class LLVMIRFoldingProvider implements FoldingRangeProvider {
-    private tokenStructProvider: LspStructProvider;
+    private tokenModelProvider: LspModelProvider;
 
-    constructor(tokenStructProvider: LspStructProvider) {
-        this.tokenStructProvider = tokenStructProvider;
+    constructor(tokenModelProvider: LspModelProvider) {
+        this.tokenModelProvider = tokenModelProvider;
     }
 
     provideFoldingRanges(
@@ -24,7 +24,7 @@ export class LLVMIRFoldingProvider implements FoldingRangeProvider {
         context: FoldingContext,
         token: CancellationToken
     ): ProviderResult<FoldingRange[]> {
-        const documentMap = this.tokenStructProvider.getStruct(document);
+        const documentMap = this.tokenModelProvider.getModel(document);
         return documentMap.foldingRanges;
     }
 }

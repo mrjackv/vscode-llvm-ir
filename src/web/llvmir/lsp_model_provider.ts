@@ -3,30 +3,30 @@
 //
 
 import { FoldingRange, FoldingRangeKind, Position, Range, TextDocument, Uri } from "vscode";
-import { Regexp } from "./Regexp";
-import { LspStruct, VariablesStruct } from "./lspStruct";
+import { FunctionInfo, LspModel } from "./lsp_model";
+import { Regexp } from "./regexp";
 
-export class LspStructProvider {
-    private tokenMap: Map<Uri, LspStruct>;
+export class LspModelProvider {
+    private documentMap: Map<Uri, LspModel>;
 
     constructor() {
-        this.tokenMap = new Map<Uri, LspStruct>();
+        this.documentMap = new Map<Uri, LspModel>();
     }
 
-    getStruct(document: TextDocument): LspStruct {
-        const documentMap = this.tokenMap.get(document.uri);
+    public getModel(document: TextDocument): LspModel {
+        const documentMap = this.documentMap.get(document.uri);
         if (documentMap !== undefined && document.version === documentMap.version) {
             return documentMap;
         } else {
             const newDocumentMap = this.scanDocument(document);
-            this.tokenMap.set(document.uri, newDocumentMap);
+            this.documentMap.set(document.uri, newDocumentMap);
             return newDocumentMap;
         }
     }
 
-    scanDocument(document: TextDocument): LspStruct {
-        const res: LspStruct = new LspStruct(document.version);
-        let lastFunction: LastFunction | undefined;
+    private scanDocument(document: TextDocument): LspModel {
+        const res: LspModel = new LspModel(document.version);
+        let lastFunction: FunctionInfo | undefined;
         let lastLabelLine: number | undefined = undefined;
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i).text.split(";", 2)[0];
@@ -40,21 +40,20 @@ export class LspStructProvider {
                 const args = defineMatch.groups["args"];
                 const hasBody = line.endsWith("{");
                 if (hasBody) {
-                    const vs = new VariablesStruct();
-                    lastFunction = { name: funcid, line: i, vs: vs };
-                    res.functions.set(funcid, vs);
+                    lastFunction = new FunctionInfo(i);
+                    res.functions.set(funcid, lastFunction);
                     const argsMatch = Array.from(args.matchAll(Regexp.argument));
                     argsMatch.forEach((am) => {
-                        if (am.index !== undefined && am.groups !== undefined) {
+                        if (am.index !== undefined && am.groups !== undefined && lastFunction !== undefined) {
                             const pos = new Position(i, am.index);
-                            vs.assignments.set(am.groups["ass"], pos);
+                            lastFunction.values.set(am.groups["ass"], pos);
                         }
                     });
                 }
             } else if (labelMatch !== null && labelMatch.index !== undefined && labelMatch.groups !== undefined) {
                 const pos = new Position(i, labelMatch.index);
                 if (lastFunction !== undefined) {
-                    lastFunction.vs.assignments.set("%" + labelMatch.groups["label"], pos);
+                    lastFunction.values.set("%" + labelMatch.groups["label"], pos);
                 }
                 if (lastLabelLine !== undefined) {
                     res.foldingRanges.push(new FoldingRange(lastLabelLine, i - 1, FoldingRangeKind.Region));
@@ -62,15 +61,14 @@ export class LspStructProvider {
                 lastLabelLine = i;
             } else if (closeMatch !== null) {
                 if (lastFunction !== undefined) {
-                    res.foldingRanges.push(new FoldingRange(lastFunction.line, i, FoldingRangeKind.Region));
-                    res.functionMarkers.push({ start: lastFunction.line, end: i, name: lastFunction.name });
-                    res.functions.set(lastFunction.name, lastFunction.vs);
+                    res.foldingRanges.push(new FoldingRange(lastFunction.lineStart, i, FoldingRangeKind.Region));
+                    lastFunction.lineEnd = i;
                     lastFunction = undefined;
                 }
             } else if (declareMatch !== null && declareMatch.groups !== undefined) {
                 const funcid = declareMatch.groups["funcid"];
                 const offset = line.indexOf(funcid);
-                res.global.assignments.set(funcid, new Position(i, offset));
+                res.global.values.set(funcid, new Position(i, offset));
             } else {
                 skip = false;
             }
@@ -85,19 +83,19 @@ export class LspStructProvider {
                             const varname = am.groups["ass"];
                             if (varname.startsWith("%")) {
                                 if (lastFunction !== undefined) {
-                                    lastFunction.vs.assignments.set(varname, pos);
+                                    lastFunction.values.set(varname, pos);
                                 }
                             } else {
-                                res.global.assignments.set(varname, pos);
+                                res.global.values.set(varname, pos);
                             }
                         } else if (am.groups["ref"] !== undefined) {
                             const varname = am.groups["ref"];
                             if (varname.startsWith("%")) {
                                 if (lastFunction !== undefined) {
-                                    this.addXref(lastFunction.vs.xrefs, varname, i, am.index, am.groups["ref"]);
+                                    this.addXref(lastFunction.users, varname, i, am.index, am.groups["ref"]);
                                 }
                             } else {
-                                this.addXref(res.global.xrefs, varname, i, am.index, am.groups["ref"]);
+                                this.addXref(res.global.users, varname, i, am.index, am.groups["ref"]);
                             }
                         }
                     }
@@ -117,10 +115,4 @@ export class LspStructProvider {
             xrefMap.set(key, [newRange]);
         }
     }
-}
-
-interface LastFunction {
-    name: string;
-    line: number;
-    vs: VariablesStruct;
 }

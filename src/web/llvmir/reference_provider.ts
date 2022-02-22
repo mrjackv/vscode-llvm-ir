@@ -13,15 +13,15 @@ import {
     TextDocument,
     Uri,
 } from "vscode";
-import { getFunctionFromLine } from "./lspStruct";
-import { LspStructProvider } from "./lspStructProvider";
-import { Regexp } from "./Regexp";
+import { getFunctionFromLine } from "./lsp_model";
+import { LspModelProvider } from "./lsp_model_provider";
+import { Regexp } from "./regexp";
 
 export class LLVMReferenceProvider implements ReferenceProvider {
-    private lspStructProvider: LspStructProvider;
+    private lspModelProvider: LspModelProvider;
 
-    constructor(lspStructProvider: LspStructProvider) {
-        this.lspStructProvider = lspStructProvider;
+    constructor(lspModelProvider: LspModelProvider) {
+        this.lspModelProvider = lspModelProvider;
     }
 
     provideReferences(
@@ -30,23 +30,21 @@ export class LLVMReferenceProvider implements ReferenceProvider {
         context: ReferenceContext,
         token: CancellationToken
     ): ProviderResult<Location[]> {
-        const lspStruct = this.lspStructProvider.getStruct(document);
+        const lspModel = this.lspModelProvider.getModel(document);
         const varRange = document.getWordRangeAtPosition(position, Regexp.identifier);
         const labelRange = document.getWordRangeAtPosition(position, Regexp.label);
-        const functionMarker = getFunctionFromLine(lspStruct.functionMarkers, position.line);
+        const functionInfo = getFunctionFromLine(lspModel, position.line);
         if (varRange !== undefined) {
             const varName = document.getText(varRange);
-            if (varName.startsWith("%") && functionMarker !== undefined) {
-                const functionMap = lspStruct.functions.get(functionMarker.name);
-                return this.transform(document.uri, functionMap?.xrefs?.get(varName));
+            if (varName.startsWith("%") && functionInfo !== undefined) {
+                return this.transform(document.uri, functionInfo.info.users.get(varName));
             } else {
-                const varXrefs = lspStruct.global.xrefs.get(varName);
+                const varXrefs = lspModel.global.users.get(varName);
                 return this.transform(document.uri, varXrefs);
             }
-        } else if (labelRange !== undefined && functionMarker !== undefined) {
+        } else if (labelRange !== undefined && functionInfo !== undefined) {
             const fixedName = `%${document.getText(labelRange)}`.replace(":", "");
-            const functionMap = lspStruct.functions.get(functionMarker.name);
-            return this.transform(document.uri, functionMap?.xrefs?.get(fixedName));
+            return this.transform(document.uri, functionInfo.info.users.get(fixedName));
         } else {
             return [];
         }

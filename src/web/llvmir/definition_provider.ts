@@ -3,28 +3,27 @@
 //
 
 import { CancellationToken, DefinitionProvider, Location, Position, TextDocument, Uri } from "vscode";
-import { getFunctionFromLine } from "./lspStruct";
-import { LspStructProvider } from "./lspStructProvider";
-import { Regexp } from "./Regexp";
+import { getFunctionFromLine } from "./lsp_model";
+import { LspModelProvider } from "./lsp_model_provider";
+import { Regexp } from "./regexp";
 
 export class LLVMIRDefinitionProvider implements DefinitionProvider {
-    private lspStructProvider: LspStructProvider;
+    private lspModelProvider: LspModelProvider;
 
-    constructor(tokenStructProvider: LspStructProvider) {
-        this.lspStructProvider = tokenStructProvider;
+    constructor(tokenModelProvider: LspModelProvider) {
+        this.lspModelProvider = tokenModelProvider;
     }
 
     provideDefinition(document: TextDocument, position: Position, token: CancellationToken): Location | undefined {
-        const lspStruct = this.lspStructProvider.getStruct(document);
+        const lspModel = this.lspModelProvider.getModel(document);
         const varRange = document.getWordRangeAtPosition(position, Regexp.identifier);
         const varName = document.getText(varRange);
-        const functionMarker = getFunctionFromLine(lspStruct.functionMarkers, position.line);
+        const functionInfo = getFunctionFromLine(lspModel, position.line);
         if (varName !== undefined) {
-            if (functionMarker !== undefined) {
-                const functionMap = lspStruct.functions.get(functionMarker.name);
-                return this.transform(document.uri, varName, lspStruct.global.assignments, functionMap?.assignments);
+            if (functionInfo !== undefined) {
+                return this.transform(document.uri, varName, lspModel.global.values, functionInfo.info.values);
             } else {
-                return this.transform(document.uri, varName, lspStruct.global.assignments, undefined);
+                return this.transform(document.uri, varName, lspModel.global.values, undefined);
             }
         }
         return undefined;
