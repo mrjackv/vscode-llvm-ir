@@ -14,3 +14,7 @@ webpack.config.js
 .eslintcache
 .husky
 docs
+typedoc.js
+jest.config.js
+dist/web/test
+.github
