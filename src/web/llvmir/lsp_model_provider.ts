@@ -77,9 +77,14 @@ export class LspModelProvider {
                     // * Add a folding range for the function
                     // * Add the line end
                     // * undefine lastFunction to return to the 'global' context only
+                    // * If there is an 'open' label, close it
                     res.foldingRanges.push(new FoldingRange(lastFunction.lineStart, i, FoldingRangeKind.Region));
                     lastFunction.lineEnd = i;
                     lastFunction = undefined;
+
+                    if (lastLabelLine !== undefined) {
+                        res.foldingRanges.push(new FoldingRange(lastLabelLine, i, FoldingRangeKind.Region));
+                    }
                 }
             } else if (declareMatch !== null && declareMatch.groups !== undefined) {
                 // Treat declarations as global values
