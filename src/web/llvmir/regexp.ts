@@ -65,7 +65,7 @@ export namespace Regexp {
         `
             (?<value>${localVarFrag})   # Capture local variables in the 'value' capture
             \\s*                        # Whitespace can follow
-            (,|)                        # Optionally a comma at the end
+            (,|$)                       # Must end with a comma or end of string
         `,
         "g"
     );
