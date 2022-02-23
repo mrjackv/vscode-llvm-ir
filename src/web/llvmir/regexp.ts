@@ -2,6 +2,9 @@
 // This file is distributed under the MIT License. See LICENSE.md for details.
 //
 
+/**
+ * Namespace containing all regexps for parsing LLVM IR
+ */
 export namespace Regexp {
     // Fragments
 
@@ -15,7 +18,10 @@ export namespace Regexp {
     const localVarFrag = `%${identifierFrag}`;
 
     // Matches local identifiers
-    const allLocalVarFrag = `%(${identifierFrag}|\\d+)`;
+    const allLocalVarFrag = xstr(`%(
+        ${identifierFrag}|  # Named identifiers
+        \\d+                # Anonymous identifiers
+    )`);
 
     // Matches attributes
     const attributeGroupFrag = "#\\d+";
@@ -24,7 +30,12 @@ export namespace Regexp {
     const metadataFrag = `!(${identifierFrag}|\\d+)`;
 
     // We vacuum up all identifiers by "OR-ing" all of them
-    const allIdentifiersFrag = `(${globalVarFrag}|${allLocalVarFrag}|${attributeGroupFrag}|${metadataFrag})`;
+    const allIdentifiersFrag = xstr(`(
+        ${globalVarFrag}|           # Global Identifiers
+        ${allLocalVarFrag}|         # Local variables
+        ${attributeGroupFrag}|      # Attributes
+        ${metadataFrag}             # Metadata
+    )`);
 
     // Regexes
 
@@ -32,28 +43,96 @@ export namespace Regexp {
     // Used with getWordRangeAtPosition
     export const identifier = new RegExp(`${allIdentifiersFrag}`);
 
-    // We consider an assignment an identifier followed by a '='
-    // Since the named capture 'ass' is first it will have precedence
-    // otherwise it is a reference it will show up in the named caputure 'ref'
-    export const refOrAss = new RegExp(`((?<ass>${allIdentifiersFrag})\\s*=|(?<ref>${allIdentifiersFrag}))`, "g");
+    /**
+     * We consider an assignment an identifier followed by a '='
+     * Since the named capture 'ass' is first it will have precedence
+     * otherwise it is a reference it will show up in the named caputure 'ref'
+     */
+    export const refOrAss = xre(
+        `(
+            (?<ass>${allIdentifiersFrag})\\s*=|     # Assignments are captured first if applicable
+            (?<ref>${allIdentifiersFrag})           # Otherwise grab identifiers as uses
+        )`,
+        "g"
+    );
 
-    // We take all locals followed by comma
-    // to be an "assignment" to a local variable
-    // This is used in function declarations to grab
-    // the 'assignment' of the function's parameters
-    export const argument = new RegExp(`(?<ass>${localVarFrag})\\s*,`, "g");
+    /**
+     * We take all locals followed optionally by a comma
+     * to be an "assignment" to a local variable
+     * This is used in function declarations to grab
+     * the 'assignment' of the function's parameters
+     */
+    export const argument = xre(
+        `
+            (?<ass>${localVarFrag})     # Capture local variables in the 'ass' capture
+            \\s*                        # Whitespace can follow
+            (,|)                        # Optionally a comma at the end
+        `,
+        "g"
+    );
 
-    // Labels are matched inside the 'label' capture to ease processing
-    export const label = new RegExp(`^(?<label>(${identifierFrag}|\\d+)):`);
+    /**
+     * Labels are matched inside the 'label' capture
+     */
+    export const label = xre(`
+        ^                                       # Match start of line
+        (?<label>(${identifierFrag}|\\d+))      # Grab identifier
+        :                                       # Must be followed by :
+    `);
 
-    // We capture function name to 'funcid'
-    // and the arguments to 'args'
-    // 'open' if present means that the function has a body
-    export const define = new RegExp(`^define.*(?<funcid>${globalVarFrag})\\((?<args>.*)\\).*(|(?<open>\\{))\\s*$`);
+    /**
+     * We capture function name to 'funcid'
+     * and the arguments to 'args'
+     * 'open' if present means that the function has a body
+     */
+    export const define = xre(`
+        ^define.*                       # Line must start with 'define'
+        (?<funcid>${globalVarFrag})     # Capture function name in 'funcid'
+        \\(                             # Match open parenthesis for arguments
+            (?<args>.*)                 # Grab in 'args' everything contained within greedily
+        \\)                             # Match the close parenthesis
+        .*                              # We dont care what follows
+        ((?<open>\\{)|)                 # Does the declaration have a body?
+                                        # if there is a { it is in the 'open' capture
+        \\s*$                           # after the { there should be only whitespace
+    `);
 
-    // Capture declare, without args
-    export const declare = new RegExp(`^declare.*(?<funcid>${globalVarFrag})\\(.*\\).*$`);
+    /**
+     * Capture declarations, ignoring arguments
+     */
+    export const declare = xre(`
+        ^declare.*                      # Line starts with declare
+        (?<funcid>${globalVarFrag})     # Grab identifier
+        \\(.*\\).*$                     # There needs to be the '(' to avoid the identifier
+                                        # Being included in the '.*'
+    `);
 
-    // The closing bracket of a function
+    /**
+     * Match the closing bracket of a function body
+     */
     export const close = new RegExp("^\\s*}\\s*$");
+}
+
+/**
+ * Given a string returns the string with
+ * comments (from # onward) removed and the line trimmed
+ * @param input input string
+ * @returns cleaned string
+ */
+function xstr(input: string): string {
+    let res = "";
+    input.split("\n").forEach((line) => {
+        res += line.split("#", 2)[0].trim();
+    });
+    return res;
+}
+
+/**
+ * Same as xstr but compile to regex instead
+ * @param input input string
+ * @param flags? regex flags as in RegExp
+ * @returns compiled regex
+ */
+function xre(input: string, flags?: string | undefined): RegExp {
+    return new RegExp(xstr(input), flags);
 }
