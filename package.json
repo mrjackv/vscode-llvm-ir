@@ -7,6 +7,11 @@
 	"engines": {
 		"vscode": "^1.64.0"
 	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/revng/vscode-llvm-ir.git"
+	},
+	"homepage": "https://github.com/revng/vscode-llvm-ir",
 	"categories": [
 		"Programming Languages",
 		"Language Packs"
