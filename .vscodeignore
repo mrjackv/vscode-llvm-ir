@@ -1,0 +1,6 @@
+**/*
+!README.md
+!LICENSE.md
+!package.json
+!dist/web/extension.js
+!dist/web/extension.js.LICENSE
