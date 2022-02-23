@@ -1,19 +1,9 @@
-# VSCode extension for LLVM IR Language
+# LLVM IR Language Suppport
 
-This is a VSCode extensions that adds language feature for LLVM IR
+This extension adds language support features for LLVM IR files (`.ll`)
 
-Currently it offers:
 
-* Definitions for all variables
-* References for all variables
+## Features 
+
+* Definition/References for all types of variables
 * Folding ranges for functions and labels
-
-## Building
-
-Before building install `node`, `yarn` and `npx`
-
-```
-yarn
-yarn add --dev vsce
-npx vsce package
-```
