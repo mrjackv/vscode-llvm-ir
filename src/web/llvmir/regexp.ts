@@ -45,26 +45,25 @@ export namespace Regexp {
 
     /**
      * We consider an assignment an identifier followed by a '='
-     * Since the named capture 'ass' is first it will have precedence
-     * otherwise it is a reference it will show up in the named caputure 'ref'
+     * Since the named capture 'value' is first it will have precedence
+     * otherwise it is a reference it will show up in the named caputure 'user'
      */
     export const refOrAss = xre(
         `(
-            (?<ass>${allIdentifiersFrag})\\s*=|     # Assignments are captured first if applicable
-            (?<ref>${allIdentifiersFrag})           # Otherwise grab identifiers as uses
+            (?<value>${allIdentifiersFrag})\\s*=|       # Assignments are captured first if applicable
+            (?<user>${allIdentifiersFrag})              # Otherwise grab identifiers as uses
         )`,
         "g"
     );
 
     /**
      * We take all locals followed optionally by a comma
-     * to be an "assignment" to a local variable
      * This is used in function declarations to grab
      * the 'assignment' of the function's parameters
      */
     export const argument = xre(
         `
-            (?<ass>${localVarFrag})     # Capture local variables in the 'ass' capture
+            (?<value>${localVarFrag})   # Capture local variables in the 'value' capture
             \\s*                        # Whitespace can follow
             (,|)                        # Optionally a comma at the end
         `,

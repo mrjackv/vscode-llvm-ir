@@ -29,73 +29,83 @@ export class LspModelProvider {
         let lastFunction: FunctionInfo | undefined;
         let lastLabelLine: number | undefined = undefined;
         for (let i = 0; i < document.lineCount; i++) {
+            // Split at the first ';' to exclude comments
             const line = document.lineAt(i).text.split(";", 2)[0];
+
+            // For each line we first check for line-long declarations
+            // if we find them we skip looking for values/users
             const labelMatch = line.match(Regexp.label);
             const defineMatch = line.match(Regexp.define);
             const declareMatch = line.match(Regexp.declare);
             const closeMatch = line.match(Regexp.close);
-            let skip = true;
+
             if (defineMatch !== null && defineMatch.index !== null && defineMatch.groups !== undefined) {
+                // Line is define, we add the funcid to the global values and parse
+                // the parameters as local values
                 const funcid = defineMatch.groups["funcid"];
                 const args = defineMatch.groups["args"];
-                const hasBody = line.endsWith("{");
-                if (hasBody) {
+
+                // TODO: use the 'open' capture
+                if (line.endsWith("{")) {
                     lastFunction = new FunctionInfo(i);
                     res.functions.set(funcid, lastFunction);
+
+                    // Take the arguments of the function and add them to the values
+                    const argsOffset = line.indexOf(args);
                     const argsMatch = Array.from(args.matchAll(Regexp.argument));
                     argsMatch.forEach((am) => {
                         if (am.index !== undefined && am.groups !== undefined && lastFunction !== undefined) {
-                            const pos = new Position(i, am.index);
-                            lastFunction.values.set(am.groups["ass"], pos);
+                            const pos = new Position(i, argsOffset + am.index);
+                            lastFunction.values.set(am.groups["value"], pos);
                         }
                     });
                 }
             } else if (labelMatch !== null && labelMatch.index !== undefined && labelMatch.groups !== undefined) {
+                // If a label is found, we add a '%' to make it coherent w.r.t. jump instructions
                 const pos = new Position(i, labelMatch.index);
                 if (lastFunction !== undefined) {
                     lastFunction.values.set("%" + labelMatch.groups["label"], pos);
                 }
                 if (lastLabelLine !== undefined) {
+                    // When a new label is found, add a folding range for the previous
                     res.foldingRanges.push(new FoldingRange(lastLabelLine, i - 1, FoldingRangeKind.Region));
                 }
                 lastLabelLine = i;
             } else if (closeMatch !== null) {
                 if (lastFunction !== undefined) {
+                    // When a close bracket is detected wrap up the function definition
+                    // * Add a folding range for the function
+                    // * Add the line end
+                    // * undefine lastFunction to return to the 'global' context only
                     res.foldingRanges.push(new FoldingRange(lastFunction.lineStart, i, FoldingRangeKind.Region));
                     lastFunction.lineEnd = i;
                     lastFunction = undefined;
                 }
             } else if (declareMatch !== null && declareMatch.groups !== undefined) {
+                // Treat declarations as global values
                 const funcid = declareMatch.groups["funcid"];
                 const offset = line.indexOf(funcid);
                 res.global.values.set(funcid, new Position(i, offset));
             } else {
-                skip = false;
-            }
-
-            if (!skip) {
+                // If none of these apply search for values/users
                 const identifierMatches = Array.from(line.matchAll(Regexp.refOrAss));
 
                 identifierMatches.forEach((am) => {
                     if (am.index !== undefined && am.groups !== undefined) {
                         const pos = new Position(i, am.index);
-                        if (am.groups["ass"] !== undefined) {
-                            const varname = am.groups["ass"];
-                            if (varname.startsWith("%")) {
-                                if (lastFunction !== undefined) {
-                                    lastFunction.values.set(varname, pos);
-                                }
+                        if (am.groups["value"] !== undefined) {
+                            const varname = am.groups["value"];
+                            if (varname.startsWith("%") && lastFunction !== undefined) {
+                                lastFunction.values.set(varname, pos);
                             } else {
                                 res.global.values.set(varname, pos);
                             }
-                        } else if (am.groups["ref"] !== undefined) {
-                            const varname = am.groups["ref"];
-                            if (varname.startsWith("%")) {
-                                if (lastFunction !== undefined) {
-                                    this.addXref(lastFunction.users, varname, i, am.index, am.groups["ref"]);
-                                }
+                        } else if (am.groups["user"] !== undefined) {
+                            const varname = am.groups["user"];
+                            if (varname.startsWith("%") && lastFunction !== undefined) {
+                                this.addUser(lastFunction.users, varname, i, am.index, am.groups["user"]);
                             } else {
-                                this.addXref(res.global.users, varname, i, am.index, am.groups["ref"]);
+                                this.addUser(res.global.users, varname, i, am.index, am.groups["user"]);
                             }
                         }
                     }
@@ -105,14 +115,14 @@ export class LspModelProvider {
         return res;
     }
 
-    private addXref(xrefMap: Map<string, Range[]>, key: string, lineNum: number, index: number, val: string) {
-        const value = xrefMap.get(key);
-        const newRange = new Range(new Position(lineNum, index), new Position(lineNum, index + val.length));
+    private addUser(users: Map<string, Range[]>, key: string, lineNum: number, index: number, matchString: string) {
+        const value = users.get(key);
+        const newRange = new Range(lineNum, index, lineNum, index + matchString.length);
         if (value !== undefined) {
             value.push(newRange);
-            xrefMap.set(key, value);
+            users.set(key, value);
         } else {
-            xrefMap.set(key, [newRange]);
+            users.set(key, [newRange]);
         }
     }
 }
