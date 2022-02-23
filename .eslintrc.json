@@ -27,6 +27,7 @@
         "semi": "off"
     },
     "ignorePatterns": [
+        "*.js",
         "**/*.d.ts"
     ]
 }
