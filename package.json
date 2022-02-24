@@ -5,7 +5,7 @@
     "description": "LLVM IR language support for Visual Studio Code",
     "version": "1.0.0",
     "engines": {
-        "vscode": "^1.64.0"
+        "vscode": "^1.63.0"
     },
     "license": "SEE LICENSE IN LICENSE.md",
     "repository": {
@@ -17,11 +17,8 @@
         "Programming Languages",
         "Language Packs"
     ],
-    "extensionDependencies": [
+    "extensionPack": [
         "RReverser.llvm"
-    ],
-    "extensionKind": [
-        "workspace"
     ],
     "activationEvents": [
         "onStartupFinished"
