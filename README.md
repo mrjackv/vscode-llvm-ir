@@ -1,9 +1,8 @@
-# LLVM IR Language Suppport
+# LLVM IR Language Support
 
 This extension adds language support features for LLVM IR files (`.ll`)
 
+## Features
 
-## Features 
-
-* Definition/References for all types of variables
-* Folding ranges for functions and labels
+-   Definition/References for all types of variables
+-   Folding ranges for functions and labels

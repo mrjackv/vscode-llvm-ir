@@ -48,7 +48,7 @@ export namespace Regexp {
      * Since the named capture 'value' is first it will have precedence
      * otherwise it is a reference it will show up in the named caputure 'user'
      */
-    export const refOrAss = xre(
+    export const valueOrUser = xre(
         `(
             (?<value>${allIdentifiersFrag})\\s*=|       # Assignments are captured first if applicable
             (?<user>${allIdentifiersFrag})              # Otherwise grab identifiers as uses

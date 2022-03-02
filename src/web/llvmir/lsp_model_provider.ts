@@ -46,7 +46,7 @@ export class LspModelProvider {
                 const args = defineMatch.groups["args"];
 
                 // TODO: use the 'open' capture
-                if (line.endsWith("{")) {
+                if (line.trim().endsWith("{")) {
                     lastFunction = new FunctionInfo(i);
                     res.functions.set(funcid, lastFunction);
 
@@ -93,7 +93,7 @@ export class LspModelProvider {
                 res.global.values.set(funcid, new Position(i, offset));
             } else {
                 // If none of these apply search for values/users
-                const identifierMatches = Array.from(line.matchAll(Regexp.refOrAss));
+                const identifierMatches = Array.from(line.matchAll(Regexp.valueOrUser));
 
                 identifierMatches.forEach((am) => {
                     if (am.index !== undefined && am.groups !== undefined) {
