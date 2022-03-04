@@ -45,20 +45,27 @@ export class LspModelProvider {
                 const funcid = defineMatch.groups["funcid"];
                 const args = defineMatch.groups["args"];
 
-                // TODO: use the 'open' capture
-                if (line.trim().endsWith("{")) {
-                    lastFunction = new FunctionInfo(i);
-                    res.functions.set(funcid, lastFunction);
+                lastFunction = new FunctionInfo(i);
+                res.functions.set(funcid, lastFunction);
 
-                    // Take the arguments of the function and add them to the values
-                    const argsOffset = line.indexOf(args);
-                    const argsMatch = Array.from(args.matchAll(Regexp.argument));
-                    argsMatch.forEach((am) => {
-                        if (am.index !== undefined && am.groups !== undefined && lastFunction !== undefined) {
-                            const pos = new Position(i, argsOffset + am.index);
-                            lastFunction.values.set(am.groups["value"], pos);
-                        }
-                    });
+                // Take the arguments of the function and add them to the values
+                const argsOffset = line.indexOf(args);
+                const argsMatch = args.matchAll(Regexp.argument);
+                const argsIndexes = [];
+                for (const am of argsMatch) {
+                    if (am.index !== undefined && am.groups !== undefined) {
+                        const pos = new Position(i, argsOffset + am.index);
+                        argsIndexes.push(am.index);
+                        lastFunction.values.set(am.groups["value"], pos);
+                    }
+                }
+
+                // Grab all other identifiers, add them to the references
+                const argsIdentifierMatch = args.matchAll(Regexp.valueOrUser);
+                for (const aim of argsIdentifierMatch) {
+                    if (aim.index !== undefined && !argsIndexes.includes(aim.index) && aim.groups !== undefined) {
+                        this.addUser(res.global.users, aim.groups["user"], i, argsOffset + aim.index);
+                    }
                 }
             } else if (labelMatch !== null && labelMatch.index !== undefined && labelMatch.groups !== undefined) {
                 // If a label is found, we add a '%' to make it coherent w.r.t. jump instructions
@@ -93,7 +100,7 @@ export class LspModelProvider {
                 res.global.values.set(funcid, new Position(i, offset));
             } else {
                 // If none of these apply search for values/users
-                const identifierMatches = Array.from(line.matchAll(Regexp.valueOrUser));
+                const identifierMatches = line.matchAll(Regexp.valueOrUser);
 
                 for (const am of identifierMatches) {
                     if (am.index !== undefined && am.groups !== undefined) {
@@ -108,9 +115,9 @@ export class LspModelProvider {
                         } else if (am.groups["user"] !== undefined) {
                             const varName = am.groups["user"];
                             if (lastFunction?.users.get(varName) !== undefined) {
-                                this.addUser(lastFunction.users, varName, i, am.index, am.groups["user"]);
+                                this.addUser(lastFunction.users, varName, i, am.index);
                             } else {
-                                this.addUser(res.global.users, varName, i, am.index, am.groups["user"]);
+                                this.addUser(res.global.users, varName, i, am.index);
                             }
                         }
                     }
@@ -120,9 +127,9 @@ export class LspModelProvider {
         return res;
     }
 
-    private addUser(users: Map<string, Range[]>, key: string, lineNum: number, index: number, matchString: string) {
+    private addUser(users: Map<string, Range[]>, key: string, lineNum: number, index: number) {
         const value = users.get(key);
-        const newRange = new Range(lineNum, index, lineNum, index + matchString.length);
+        const newRange = new Range(lineNum, index, lineNum, index + key.length);
         if (value !== undefined) {
             value.push(newRange);
             users.set(key, value);
