@@ -11,3 +11,12 @@ yarn add vsce
 ```
 
 Now there should be a `llvm-ir-<version>.vsix` file present that can be installed via the menu option 'Install from VSIX' in the Extensions tab
+
+## Running Tests
+
+To run tests
+
+```
+yarn
+yarn run test
+```
