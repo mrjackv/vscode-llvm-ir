@@ -134,9 +134,13 @@ export namespace Regexp {
  */
 function xstr(input: string): string {
     let res = "";
-    input.split("\n").forEach((line) => {
-        res += line.split("#", 2)[0].trim();
-    });
+    for (const line of input.split("\n")) {
+        const components = line.split("#");
+        if (components.length > 1) {
+            components.pop();
+        }
+        res += components.join("#").trim();
+    }
     return res;
 }
 
