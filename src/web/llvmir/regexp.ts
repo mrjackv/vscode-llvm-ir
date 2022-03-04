@@ -67,7 +67,7 @@ export namespace Regexp {
     export const valueOrUser = xre(
         `(
             (?<value>${allIdentifiersFrag})\\s*=|       # Assignments are captured first if applicable
-            (?<user>${allIdentifiersFrag})              # Otherwise grab identifiers as uses
+            (?<user>${allIdentifiersFrag})(\\*|)        # Otherwise grab identifiers as uses
         )`,
         "g"
     );
@@ -79,9 +79,9 @@ export namespace Regexp {
      */
     export const argument = xre(
         `
-            (?<value>${localVarFrag})   # Capture local variables in the 'value' capture
-            \\s*                        # Whitespace can follow
-            (,|$)                       # Must end with a comma or end of string
+            (?<value>${allLocalVarFrag})    # Capture local variables in the 'value' capture
+            \\s*                            # Whitespace can follow
+            (,|$)                           # Must end with a comma or end of string
         `,
         "g"
     );
