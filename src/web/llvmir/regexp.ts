@@ -8,28 +8,42 @@
 export namespace Regexp {
     // Fragments
 
-    // Standard identifier from https://llvm.org/docs/LangRef.html#identifiers
+    /**
+     * Standard identifier from https://llvm.org/docs/LangRef.html#identifiers
+     */
     const identifierFrag = "[-a-zA-Z$._][-a-zA-Z$._0-9]*";
 
-    // Matches global identifiers
+    /**
+     * Matches global identifiers
+     */
     const globalVarFrag = `@${identifierFrag}`;
 
-    // Matches only non-anonymous locals
+    /**
+     * Matches only non-anonymous locals
+     */
     const localVarFrag = `%${identifierFrag}`;
 
-    // Matches local identifiers
+    /**
+     * Matches local identifiers
+     */
     const allLocalVarFrag = xstr(`%(
         ${identifierFrag}|  # Named identifiers
         \\d+                # Anonymous identifiers
     )`);
 
-    // Matches attributes
+    /**
+     * Matches attributes
+     */
     const attributeGroupFrag = "#\\d+";
 
-    // Matches metadata
+    /**
+     * Matches metadata
+     */
     const metadataFrag = `!(${identifierFrag}|\\d+)`;
 
-    // We vacuum up all identifiers by "OR-ing" all of them
+    /**
+     * Vacuum up all identifiers by "OR-ing" all of them
+     */
     const allIdentifiersFrag = xstr(`(
         ${globalVarFrag}|           # Global Identifiers
         ${allLocalVarFrag}|         # Local variables
@@ -39,8 +53,10 @@ export namespace Regexp {
 
     // Regexes
 
-    // Generic identifier regex, without named capture
-    // Used with getWordRangeAtPosition
+    /**
+     * Generic identifier regex, without named capture
+     * Used with getWordRangeAtPosition
+     */
     export const identifier = new RegExp(`${allIdentifiersFrag}`);
 
     /**
