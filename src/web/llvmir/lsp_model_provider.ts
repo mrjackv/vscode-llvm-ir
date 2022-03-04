@@ -95,7 +95,7 @@ export class LspModelProvider {
                 // If none of these apply search for values/users
                 const identifierMatches = Array.from(line.matchAll(Regexp.valueOrUser));
 
-                identifierMatches.forEach((am) => {
+                for (const am of identifierMatches) {
                     if (am.index !== undefined && am.groups !== undefined) {
                         const pos = new Position(i, am.index);
                         if (am.groups["value"] !== undefined) {
@@ -106,15 +106,15 @@ export class LspModelProvider {
                                 res.global.values.set(varname, pos);
                             }
                         } else if (am.groups["user"] !== undefined) {
-                            const varname = am.groups["user"];
-                            if (varname.startsWith("%") && lastFunction !== undefined) {
-                                this.addUser(lastFunction.users, varname, i, am.index, am.groups["user"]);
+                            const varName = am.groups["user"];
+                            if (lastFunction?.users.get(varName) !== undefined) {
+                                this.addUser(lastFunction.users, varName, i, am.index, am.groups["user"]);
                             } else {
-                                this.addUser(res.global.users, varname, i, am.index, am.groups["user"]);
+                                this.addUser(res.global.users, varName, i, am.index, am.groups["user"]);
                             }
                         }
                     }
-                });
+                }
             }
         }
         return res;
