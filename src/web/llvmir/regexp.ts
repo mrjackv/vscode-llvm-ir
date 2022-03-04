@@ -19,11 +19,6 @@ export namespace Regexp {
     const globalVarFrag = `@${identifierFrag}`;
 
     /**
-     * Matches only non-anonymous locals
-     */
-    const localVarFrag = `%${identifierFrag}`;
-
-    /**
      * Matches local identifiers
      */
     const allLocalVarFrag = xstr(`%(
