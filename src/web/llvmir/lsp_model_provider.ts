@@ -44,6 +44,7 @@ export class LspModelProvider {
                 // the parameters as local values
                 const funcid = defineMatch.groups["funcid"];
                 const args = defineMatch.groups["args"];
+                const funcmeta = defineMatch.groups["funcmeta"];
 
                 lastFunction = new FunctionInfo(i);
                 res.functions.set(funcid, lastFunction);
@@ -65,6 +66,15 @@ export class LspModelProvider {
                 for (const aim of argsIdentifierMatch) {
                     if (aim.index !== undefined && !argsIndexes.includes(aim.index) && aim.groups !== undefined) {
                         this.addUser(res.global.users, aim.groups["user"], i, argsOffset + aim.index);
+                    }
+                }
+
+                // Grab function metadata
+                const funcMetaOffset = line.indexOf(funcmeta);
+                const funcMetaMatches = funcmeta.matchAll(Regexp.valueOrUser);
+                for (const fmm of funcMetaMatches) {
+                    if (fmm.index !== undefined && fmm.groups !== undefined) {
+                        this.addUser(res.global.users, fmm.groups["user"], i, funcMetaOffset + fmm.index);
                     }
                 }
             } else if (labelMatch !== null && labelMatch.index !== undefined && labelMatch.groups !== undefined) {

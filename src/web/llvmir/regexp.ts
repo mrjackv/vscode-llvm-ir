@@ -106,10 +106,8 @@ export namespace Regexp {
         \\(                             # Match open parenthesis for arguments
             (?<args>.*)                 # Grab in 'args' everything contained within greedily
         \\)                             # Match the close parenthesis
-        .*                              # We dont care what follows
-        ((?<open>\\{)|)                 # Does the declaration have a body?
-                                        # if there is a { it is in the 'open' capture
-        \\s*$                           # after the { there should be only whitespace
+        (?<funcmeta>.*)                 # Capture function metadata
+        \\s*$                           # after that there should be only whitespace
     `);
 
     /**
