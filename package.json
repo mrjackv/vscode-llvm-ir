@@ -13,6 +13,7 @@
         "url": "https://github.com/revng/vscode-llvm-ir.git"
     },
     "homepage": "https://github.com/revng/vscode-llvm-ir",
+    "icon": "icon.png",
     "categories": [
         "Programming Languages",
         "Language Packs"
