@@ -124,7 +124,7 @@ export class LspModelProvider {
                             }
                         } else if (am.groups["user"] !== undefined) {
                             const varName = am.groups["user"];
-                            if (lastFunction?.users.get(varName) !== undefined) {
+                            if (lastFunction?.values.get(varName) !== undefined) {
                                 this.addUser(lastFunction.users, varName, i, am.index);
                             } else {
                                 this.addUser(res.global.users, varName, i, am.index);

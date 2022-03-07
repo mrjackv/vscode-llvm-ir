@@ -36,10 +36,10 @@ export class LLVMReferenceProvider implements ReferenceProvider {
         const functionInfo = getFunctionFromLine(lspModel, position.line);
         if (varRange !== undefined) {
             const varName = document.getText(varRange);
-            const globalUsers = lspModel.global.users.get(varName);
-            if (functionInfo !== undefined) {
-                return this.transform(document.uri, globalUsers, functionInfo.info.users.get(varName));
+            if (functionInfo?.info.values.get(varName) !== undefined) {
+                return this.transform(document.uri, functionInfo.info.users.get(varName));
             } else {
+                const globalUsers = lspModel.global.users.get(varName);
                 return this.transform(document.uri, globalUsers);
             }
         } else if (labelRange !== undefined && functionInfo !== undefined) {
@@ -50,14 +50,7 @@ export class LLVMReferenceProvider implements ReferenceProvider {
         }
     }
 
-    private transform(uri: Uri, globalRanges?: Range[], localRanges?: Range[]): Location[] {
-        const ret = [];
-        if (globalRanges !== undefined) {
-            ret.push(...globalRanges.map((e) => new Location(uri, e)));
-        }
-        if (localRanges !== undefined) {
-            ret.push(...localRanges.map((e) => new Location(uri, e)));
-        }
-        return ret;
+    private transform(uri: Uri, ranges?: Range[]): Location[] {
+        return ranges !== undefined ? ranges.map((e) => new Location(uri, e)) : [];
     }
 }
