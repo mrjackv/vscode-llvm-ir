@@ -6,7 +6,6 @@ Then:
 
 ```
 yarn
-yarn add vsce
 ./node_modules/.bin/vsce package
 ```
 
