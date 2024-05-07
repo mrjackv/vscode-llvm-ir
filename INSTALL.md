@@ -1,11 +1,11 @@
 ## Compilation Instructions
 
-Make sure you have `node` and `yarn` installed on the local machine
+Make sure you have `node` and `npm` installed on the local machine
 
 Then:
 
 ```
-yarn
+npm
 ./node_modules/.bin/vsce package
 ```
 
@@ -16,6 +16,5 @@ Now there should be a `llvm-ir-<version>.vsix` file present that can be installe
 To run tests
 
 ```
-yarn
-yarn run test
+npm run test
 ```
