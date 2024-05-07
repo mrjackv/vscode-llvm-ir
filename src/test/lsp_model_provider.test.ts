@@ -54,6 +54,7 @@ describe("LspModelProvider", () => {
             "@0",
             "@😎",
             "@printf",
+            "@main",
         ]);
     });
 

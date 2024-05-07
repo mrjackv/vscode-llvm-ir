@@ -48,7 +48,12 @@ export class LspModelProvider {
                 const funcmeta = defineMatch.groups["funcmeta"];
 
                 lastFunction = new FunctionInfo(i);
-                res.functions.set(normalizeIdentifier(funcid), lastFunction);
+                const normalizedFuncId = normalizeIdentifier(funcid);
+                res.functions.set(normalizedFuncId, lastFunction);
+
+                // Add the function to the list of values
+                const functionIdentifierOffset = line.indexOf(funcid);
+                res.global.values.set(normalizedFuncId, new Position(i, functionIdentifierOffset));
 
                 // Take the arguments of the function and add them to the values
                 const argsOffset = line.indexOf(args);
