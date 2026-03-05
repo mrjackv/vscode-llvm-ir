@@ -28,6 +28,7 @@ describe("LspModelProvider", () => {
             return false;
         },
         eol: EndOfLine.LF,
+        encoding: "utf8",
         lineCount: lines.length,
         lineAt: lineAt as any,
         getText: null as any,
